@@ -1,0 +1,45 @@
+{
+  "folders": [
+    {
+      "name": "🏠 Raiz",
+      "path": "."
+    },
+    {
+      "name": "⚙️ Lançamentos API",
+      "path": "src/FluxoCaixa.Lancamentos.API"
+    },
+    {
+      "name": "📊 Consolidado API",
+      "path": "src/FluxoCaixa.Consolidado.API"
+    },
+    {
+      "name": "🔗 Shared",
+      "path": "src/FluxoCaixa.Shared"
+    },
+    {
+      "name": "🌐 Frontend Angular",
+      "path": "frontend"
+    }
+  ],
+  "settings": {
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+    "files.exclude": {
+      "**/bin": true,
+      "**/obj": true,
+      "**/node_modules": true,
+      "**/.angular": true
+    },
+    "dotnet.defaultSolution": "FluxoCaixa.sln"
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-dotnettools.csharp",
+      "ms-dotnettools.csdevkit",
+      "angular.ng-template",
+      "ms-azuretools.vscode-docker",
+      "editorconfig.editorconfig",
+      "esbenp.prettier-vscode"
+    ]
+  }
+}
