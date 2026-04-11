@@ -86,7 +86,7 @@ fluxo-caixa/
 
 ```bash
 # Clone o repositório
-git clone https://github.com/SEU_USUARIO/fluxo-caixa.git
+git clone https://github.com/ledebour/fluxo-caixa.git
 cd fluxo-caixa
 
 # Sobe tudo com um comando
