@@ -1,3 +1,4 @@
+using FluxoCaixa.Lancamentos.API.Domain.Entities;
 using FluxoCaixa.Lancamentos.API.Domain.Exceptions;
 using FluxoCaixa.Lancamentos.API.Domain.Interfaces;
 using FluxoCaixa.Shared.Events;
@@ -24,7 +25,7 @@ public class RemoverLancamentoUseCase
     public async Task ExecutarAsync(Guid id, CancellationToken ct = default)
     {
         var lancamento = await _repository.ObterPorIdAsync(id, ct)
-            ?? throw new NotFoundException(nameof(lancamento), id);
+            ?? throw new NotFoundException(nameof(Lancamento), id);
 
         await _repository.RemoverAsync(lancamento, ct);
 

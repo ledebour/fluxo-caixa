@@ -1,3 +1,4 @@
+using FluxoCaixa.Shared.Messaging;
 using FluxoCaixa.Lancamentos.API.API.Middleware;
 using FluxoCaixa.Lancamentos.API.Application.UseCases;
 using FluxoCaixa.Lancamentos.API.Domain.Interfaces;
@@ -56,6 +57,10 @@ builder.Services.AddDbContext<LancamentosDbContext>(opts =>
 builder.Services.AddScoped<ILancamentoRepository, LancamentoRepository>();
 
 // ─── Mensageria (RabbitMQ) ───────────────────────────────────────────────────
+// ─── RabbitMQ Settings 
+ builder.Services.Configure<RabbitMqSettings>(
+     builder.Configuration.GetSection("RabbitMQ"));
+
 builder.Services.AddSingleton<IEventPublisher, RabbitMqEventPublisher>();
 
 // ─── Use Cases (Application) ─────────────────────────────────────────────────

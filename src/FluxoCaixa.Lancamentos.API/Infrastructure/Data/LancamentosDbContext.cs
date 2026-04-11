@@ -5,7 +5,7 @@ namespace FluxoCaixa.Lancamentos.API.Infrastructure.Data;
 
 /// <summary>
 /// Contexto do Entity Framework Core para o serviço de Lançamentos.
-/// Mapeamento completo das entidades está no commit 4 (Persistência).
+/// Aplica automaticamente todas as IEntityTypeConfiguration do assembly.
 /// </summary>
 public class LancamentosDbContext : DbContext
 {
@@ -16,8 +16,19 @@ public class LancamentosDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Configurações de mapeamento serão aplicadas no commit 4
+        // Schema padrão no PostgreSQL
+        modelBuilder.HasDefaultSchema("public");
+
+        // Aplica todos os IEntityTypeConfiguration do assembly automaticamente
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(LancamentosDbContext).Assembly);
+
         base.OnModelCreating(modelBuilder);
+    }
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        // Garante que todos os DateTime sejam persistidos como UTC no PostgreSQL
+        configurationBuilder.Properties<DateTime>()
+            .HaveColumnType("timestamp with time zone");
     }
 }
