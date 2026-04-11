@@ -1,0 +1,217 @@
+<div class="consolidado fade-in">
+
+  <!-- Cabeçalho -->
+  <div class="consolidado__header">
+    <div>
+      <h1 class="page-title">Consolidado Diário</h1>
+      <p class="page-subtitle">Saldo consolidado por dia com cache Redis</p>
+    </div>
+    <button class="btn btn--ghost" (click)="carregarHoje()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/>
+      </svg>
+      Atualizar
+    </button>
+  </div>
+
+  <!-- Card de hoje -->
+  <div class="consolidado__hoje">
+    <div class="hoje-card">
+      <div class="hoje-card__label">
+        <span class="hoje-card__date">Hoje — {{ hoje | date:'dd/MM/yyyy' }}</span>
+        @if (consolidadoHoje()?.veioDoCache) {
+          <span class="cache-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12">
+              <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+            </svg>
+            Cache Redis
+          </span>
+        }
+      </div>
+
+      @if (carregandoHoje()) {
+        <div class="empty-state" style="padding: 2rem 0">
+          <div class="spinner"></div>
+        </div>
+      } @else if (consolidadoHoje(); as c) {
+        <div class="hoje-card__saldo" [ngClass]="saldoClass()">
+          {{ c.saldoFinal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+        </div>
+        <div class="hoje-card__grid">
+          <div class="hoje-card__stat">
+            <span class="hoje-card__stat-label">Créditos</span>
+            <span class="hoje-card__stat-value valor-positivo">
+              {{ c.totalCreditos | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+            </span>
+          </div>
+          <div class="hoje-card__divider"></div>
+          <div class="hoje-card__stat">
+            <span class="hoje-card__stat-label">Débitos</span>
+            <span class="hoje-card__stat-value valor-negativo">
+              {{ c.totalDebitos | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+            </span>
+          </div>
+          <div class="hoje-card__divider"></div>
+          <div class="hoje-card__stat">
+            <span class="hoje-card__stat-label">Lançamentos</span>
+            <span class="hoje-card__stat-value valor-neutro">{{ c.quantidadeLancamentos }}</span>
+          </div>
+        </div>
+        <div class="hoje-card__footer">
+          Atualizado em {{ c.atualizadoEm | date:'dd/MM/yy HH:mm' }}
+        </div>
+      } @else {
+        <div class="hoje-card__empty">
+          <span>📭</span>
+          <span>{{ erroHoje() ?? 'Sem lançamentos hoje.' }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Filtro de Período -->
+  <div class="card">
+    <h2 class="section-title">Histórico por Período</h2>
+    <form class="periodo-form" [formGroup]="formPeriodo" (ngSubmit)="carregarPeriodo()">
+      <div class="form-group">
+        <label>Data Início</label>
+        <input type="date" class="input" formControlName="inicio"/>
+      </div>
+      <div class="form-group">
+        <label>Data Fim</label>
+        <input type="date" class="input" formControlName="fim"/>
+      </div>
+      <button type="submit" class="btn btn--primary" [disabled]="carregandoPeriodo()">
+        @if (carregandoPeriodo()) {
+          <span class="spinner"></span>
+        } @else {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+        }
+        Consultar
+      </button>
+    </form>
+  </div>
+
+  <!-- Resultado do Período -->
+  @if (erroPeriodo()) {
+    <div class="toast toast--error fade-in">✕ {{ erroPeriodo() }}</div>
+  }
+
+  @if (periodo(); as p) {
+    <!-- Totais do período -->
+    <div class="periodo-summary">
+      <div class="summary-card summary-card--credito">
+        <span class="summary-card__label">Créditos no Período</span>
+        <span class="summary-card__value valor-positivo">
+          {{ p.totalCreditos | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+        </span>
+      </div>
+      <div class="summary-card summary-card--debito">
+        <span class="summary-card__label">Débitos no Período</span>
+        <span class="summary-card__value valor-negativo">
+          {{ p.totalDebitos | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+        </span>
+      </div>
+      <div class="summary-card">
+        <span class="summary-card__label">Saldo do Período</span>
+        <span class="summary-card__value"
+              [class.valor-positivo]="p.saldoFinal >= 0"
+              [class.valor-negativo]="p.saldoFinal < 0">
+          {{ p.saldoFinal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+        </span>
+      </div>
+      <div class="summary-card">
+        <span class="summary-card__label">Dias com Movimento</span>
+        <span class="summary-card__value valor-neutro">{{ p.totalDias }}</span>
+      </div>
+    </div>
+
+    <!-- Gráfico de barras por dia -->
+    @if (p.dias.length > 0) {
+      <div class="card">
+        <h3 class="section-title" style="margin-bottom: var(--space-5)">
+          Créditos e Débitos por Dia
+        </h3>
+        <div class="chart">
+          @for (dia of p.dias; track dia.data) {
+            <div class="chart__col">
+              <div class="chart__bars">
+                <div class="chart__bar chart__bar--credito"
+                     [style.height.%]="barWidth(dia.totalCreditos)"
+                     [title]="'Crédito: ' + (dia.totalCreditos | currency:'BRL':'symbol':'1.2-2':'pt-BR')">
+                </div>
+                <div class="chart__bar chart__bar--debito"
+                     [style.height.%]="barWidth(dia.totalDebitos)"
+                     [title]="'Débito: ' + (dia.totalDebitos | currency:'BRL':'symbol':'1.2-2':'pt-BR')">
+                </div>
+              </div>
+              <span class="chart__label">{{ formatarData(dia.data) }}</span>
+            </div>
+          }
+        </div>
+        <div class="chart__legend">
+          <span class="chart__legend-item chart__legend-item--credito">Créditos</span>
+          <span class="chart__legend-item chart__legend-item--debito">Débitos</span>
+        </div>
+      </div>
+
+      <!-- Tabela detalhada -->
+      <div class="card">
+        <h3 class="section-title" style="margin-bottom: var(--space-4)">Detalhamento Diário</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th style="text-align:right">Créditos</th>
+                <th style="text-align:right">Débitos</th>
+                <th style="text-align:right">Saldo</th>
+                <th style="text-align:center">Lançamentos</th>
+                <th style="text-align:center">Cache</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (dia of p.dias; track dia.data) {
+                <tr>
+                  <td class="td-mono">{{ dia.data | date:'dd/MM/yyyy':'UTC' }}</td>
+                  <td class="td-mono" style="text-align:right">
+                    <span class="valor-positivo">
+                      {{ dia.totalCreditos | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                    </span>
+                  </td>
+                  <td class="td-mono" style="text-align:right">
+                    <span class="valor-negativo">
+                      {{ dia.totalDebitos | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                    </span>
+                  </td>
+                  <td class="td-mono" style="text-align:right">
+                    <span [class.valor-positivo]="dia.saldoFinal >= 0"
+                          [class.valor-negativo]="dia.saldoFinal < 0">
+                      {{ dia.saldoFinal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                    </span>
+                  </td>
+                  <td class="td-mono" style="text-align:center">{{ dia.quantidadeLancamentos }}</td>
+                  <td style="text-align:center">
+                    @if (dia.veioDoCache) {
+                      <span class="cache-badge">Redis</span>
+                    } @else {
+                      <span class="db-badge">DB</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    } @else {
+      <div class="empty-state">
+        <span class="empty-state__icon">📊</span>
+        <p class="empty-state__text">Nenhum dado encontrado para o período selecionado.</p>
+      </div>
+    }
+  }
+</div>
+

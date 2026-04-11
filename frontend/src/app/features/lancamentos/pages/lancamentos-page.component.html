@@ -1,0 +1,178 @@
+<div class="lancamentos fade-in">
+
+  <!-- Cabeçalho -->
+  <div class="lancamentos__header">
+    <div>
+      <h1 class="page-title">Lançamentos</h1>
+      <p class="page-subtitle">Débitos e créditos do fluxo de caixa</p>
+    </div>
+    <button class="btn btn--primary" (click)="toggleFormulario()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+      {{ mostrarFormulario() ? 'Cancelar' : 'Novo Lançamento' }}
+    </button>
+  </div>
+
+  <!-- Feedback -->
+  @if (sucesso()) {
+    <div class="toast toast--success fade-in">✓ {{ sucesso() }}</div>
+  }
+  @if (erro()) {
+    <div class="toast toast--error fade-in">✕ {{ erro() }}</div>
+  }
+
+  <!-- Formulário -->
+  @if (mostrarFormulario()) {
+    <div class="card lancamentos__form fade-in">
+      <h2 class="lancamentos__form-title">Novo Lançamento</h2>
+      <form [formGroup]="form" (ngSubmit)="salvar()">
+        <div class="lancamentos__form-grid">
+
+          <div class="form-group">
+            <label>Data</label>
+            <input type="date" class="input" formControlName="data"
+                   [class.input--error]="fieldError('data')"/>
+            @if (fieldError('data')) {
+              <span class="field-error">Data é obrigatória</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Valor (R$)</label>
+            <input type="number" class="input" formControlName="valor"
+                   placeholder="0,00" step="0.01" min="0.01"
+                   [class.input--error]="fieldError('valor')"/>
+            @if (fieldError('valor')) {
+              <span class="field-error">Informe um valor válido</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Tipo</label>
+            <select class="input" formControlName="tipo">
+              <option value="Credito">Crédito</option>
+              <option value="Debito">Débito</option>
+            </select>
+          </div>
+
+          <div class="form-group lancamentos__form-full">
+            <label>Descrição</label>
+            <input type="text" class="input" formControlName="descricao"
+                   placeholder="Ex: Pagamento de cliente"
+                   [class.input--error]="fieldError('descricao')"/>
+            @if (fieldError('descricao')) {
+              <span class="field-error">Descrição é obrigatória (máx. 200 caracteres)</span>
+            }
+          </div>
+
+        </div>
+
+        <div class="lancamentos__form-actions">
+          <button type="button" class="btn btn--ghost" (click)="toggleFormulario()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn--primary" [disabled]="salvando()">
+            @if (salvando()) {
+              <span class="spinner"></span> Salvando...
+            } @else {
+              Salvar Lançamento
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- Sumário -->
+  <div class="lancamentos__summary">
+    <div class="summary-card summary-card--credito">
+      <span class="summary-card__label">Total Créditos</span>
+      <span class="summary-card__value valor-positivo">
+        {{ totalCreditos() | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+      </span>
+    </div>
+    <div class="summary-card summary-card--debito">
+      <span class="summary-card__label">Total Débitos</span>
+      <span class="summary-card__value valor-negativo">
+        {{ totalDebitos() | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+      </span>
+    </div>
+    <div class="summary-card">
+      <span class="summary-card__label">Saldo Período</span>
+      <span class="summary-card__value"
+            [class.valor-positivo]="totalCreditos() - totalDebitos() >= 0"
+            [class.valor-negativo]="totalCreditos() - totalDebitos() < 0">
+        {{ (totalCreditos() - totalDebitos()) | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+      </span>
+    </div>
+    <div class="summary-card">
+      <span class="summary-card__label">Lançamentos</span>
+      <span class="summary-card__value valor-neutro">{{ lancamentos().length }}</span>
+    </div>
+  </div>
+
+  <!-- Tabela -->
+  <div class="card">
+    @if (carregando()) {
+      <div class="empty-state">
+        <div class="spinner"></div>
+        <p class="empty-state__text">Carregando lançamentos...</p>
+      </div>
+    } @else if (lancamentos().length === 0) {
+      <div class="empty-state">
+        <span class="empty-state__icon">📋</span>
+        <p class="empty-state__text">Nenhum lançamento encontrado.<br>Clique em "Novo Lançamento" para começar.</p>
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Descrição</th>
+              <th>Tipo</th>
+              <th style="text-align:right">Valor</th>
+              <th>Criado em</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (l of lancamentos(); track l.id) {
+              <tr>
+                <td class="td-mono">{{ l.data | date:'dd/MM/yyyy':'UTC' }}</td>
+                <td>{{ l.descricao }}</td>
+                <td>
+                  <span class="badge" [class.badge--credito]="l.tipo === 'Credito'"
+                                      [class.badge--debito]="l.tipo === 'Debito'">
+                    {{ l.tipo === 'Credito' ? '▲ Crédito' : '▼ Débito' }}
+                  </span>
+                </td>
+                <td style="text-align:right">
+                  <span [class.valor-positivo]="l.tipo === 'Credito'"
+                        [class.valor-negativo]="l.tipo === 'Debito'">
+                    {{ l.valor | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                  </span>
+                </td>
+                <td class="td-mono">{{ l.criadoEm | date:'dd/MM/yy HH:mm' }}</td>
+                <td>
+                  <button class="btn btn--danger btn--sm"
+                          [disabled]="removendo() === l.id"
+                          (click)="remover(l.id)">
+                    @if (removendo() === l.id) {
+                      <span class="spinner"></span>
+                    } @else {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
+                      </svg>
+                    }
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
