@@ -16,7 +16,7 @@ info() { echo -e "${CYAN}[→]${NC} $1"; }
 warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 
 echo ""
-echo "  ₢  FluxoCaixa — Ambiente de Desenvolvimento"
+echo "  F  FluxoCaixa — Ambiente de Desenvolvimento"
 echo "  ─────────────────────────────────────────────"
 echo ""
 

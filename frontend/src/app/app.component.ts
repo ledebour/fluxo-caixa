@@ -9,7 +9,7 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
     <div class="app-shell">
       <aside class="sidebar">
         <div class="sidebar__brand">
-          <span class="sidebar__icon">₢</span>
+          <span class="sidebar__icon">F</span>
           <span class="sidebar__title">FluxoCaixa</span>
         </div>
 
