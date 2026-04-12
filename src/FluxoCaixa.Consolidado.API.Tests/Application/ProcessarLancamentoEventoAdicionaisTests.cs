@@ -1,0 +1,156 @@
+using FluxoCaixa.Consolidado.API.Application.UseCases;
+using FluxoCaixa.Consolidado.API.Domain.Entities;
+using FluxoCaixa.Consolidado.API.Domain.Interfaces;
+using FluxoCaixa.Shared.Enums;
+using FluxoCaixa.Shared.Events;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
+using Xunit;
+
+namespace FluxoCaixa.Consolidado.Tests.Application;
+
+public class ProcessarLancamentoEventoAdicionaisTests
+{
+    private readonly IConsolidadoRepository _repository = Substitute.For<IConsolidadoRepository>();
+    private readonly IConsolidadoCache _cache = Substitute.For<IConsolidadoCache>();
+    private readonly ILogger<ProcessarLancamentoEventoUseCase> _logger =
+        Substitute.For<ILogger<ProcessarLancamentoEventoUseCase>>();
+    private readonly ProcessarLancamentoEventoUseCase _useCase;
+
+    public ProcessarLancamentoEventoAdicionaisTests()
+    {
+        _useCase = new ProcessarLancamentoEventoUseCase(_repository, _cache, _logger);
+    }
+
+    // ─── Consolidado já existente ─────────────────────────────────────────────
+
+    [Fact]
+    public async Task ProcessarCriado_ConsolidadoJaExiste_DeveAcumularAoExistente()
+    {
+        var data = new DateTime(2025, 7, 1);
+        var consolidadoExistente = ConsolidadoDiario.Criar(data);
+        consolidadoExistente.AplicarCredito(1000m);
+        consolidadoExistente.AplicarDebito(200m);
+        _repository.ObterPorDataAsync(data).Returns(consolidadoExistente);
+
+        var evento = new LancamentoCriadoEvent
+        {
+            Id = Guid.NewGuid(),
+            Data = data,
+            Valor = 500m,
+            Tipo = TipoLancamento.Credito,
+            Descricao = "Segundo crédito do dia"
+        };
+
+        await _useCase.ProcessarCriadoAsync(evento);
+
+        await _repository.Received(1).SalvarAsync(
+            Arg.Is<ConsolidadoDiario>(c =>
+                c.TotalCreditos == 1500m &&
+                c.TotalDebitos == 200m &&
+                c.SaldoFinal == 1300m),
+            Arg.Any<CancellationToken>());
+    }
+
+    // ─── Múltiplos eventos no mesmo dia ───────────────────────────────────────
+
+    [Fact]
+    public async Task ProcessarCriado_MultiplosEventosMesmoDia_DeveCriarConsolidadoUmaSoVez()
+    {
+        var data = new DateTime(2025, 8, 15);
+
+        // Primeiro evento — sem consolidado ainda
+        _repository.ObterPorDataAsync(data).Returns((ConsolidadoDiario?)null);
+        await _useCase.ProcessarCriadoAsync(new LancamentoCriadoEvent
+        {
+            Id = Guid.NewGuid(), Data = data, Valor = 100m,
+            Tipo = TipoLancamento.Credito, Descricao = "Primeiro"
+        });
+
+        // Segundo evento — consolidado já existe (retornado pelo mock)
+        var consolidadoCriado = ConsolidadoDiario.Criar(data);
+        consolidadoCriado.AplicarCredito(100m);
+        _repository.ObterPorDataAsync(data).Returns(consolidadoCriado);
+        await _useCase.ProcessarCriadoAsync(new LancamentoCriadoEvent
+        {
+            Id = Guid.NewGuid(), Data = data, Valor = 200m,
+            Tipo = TipoLancamento.Credito, Descricao = "Segundo"
+        });
+
+        await _repository.Received(2).SalvarAsync(Arg.Any<ConsolidadoDiario>(), Arg.Any<CancellationToken>());
+        await _cache.Received(2).InvalidarAsync(data, Arg.Any<CancellationToken>());
+    }
+
+    // ─── Estorno via ProcessarRemovido ────────────────────────────────────────
+
+    [Fact]
+    public async Task ProcessarRemovido_Debito_DeveEstornarDebito()
+    {
+        var data = DateTime.Today;
+        var consolidado = ConsolidadoDiario.Criar(data);
+        consolidado.AplicarCredito(500m);
+        consolidado.AplicarDebito(300m);
+        _repository.ObterPorDataAsync(data).Returns(consolidado);
+
+        var evento = new LancamentoRemovidoEvent
+        {
+            Id = Guid.NewGuid(),
+            Data = data,
+            Valor = 300m,
+            Tipo = TipoLancamento.Debito
+        };
+
+        await _useCase.ProcessarRemovidoAsync(evento);
+
+        await _repository.Received(1).SalvarAsync(
+            Arg.Is<ConsolidadoDiario>(c =>
+                c.TotalDebitos == 0m &&
+                c.TotalCreditos == 500m &&
+                c.SaldoFinal == 500m),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ProcessarRemovido_ConsolidadoNaoExiste_DeveCriarZeradoEEstornar()
+    {
+        var data = new DateTime(2025, 9, 1);
+        _repository.ObterPorDataAsync(data).Returns((ConsolidadoDiario?)null);
+
+        var evento = new LancamentoRemovidoEvent
+        {
+            Id = Guid.NewGuid(),
+            Data = data,
+            Valor = 100m,
+            Tipo = TipoLancamento.Credito
+        };
+
+        // Não deve lançar exceção — cria consolidado zerado e aplica estorno
+        await _useCase.ProcessarRemovidoAsync(evento);
+
+        await _repository.Received(1).SalvarAsync(
+            Arg.Is<ConsolidadoDiario>(c => c.TotalCreditos == 0m),
+            Arg.Any<CancellationToken>());
+    }
+
+    // ─── Cache invalidação ────────────────────────────────────────────────────
+
+    [Fact]
+    public async Task ProcessarCriado_SempreInvalidaCacheAposGravar()
+    {
+        var data = DateTime.Today;
+        _repository.ObterPorDataAsync(data).Returns((ConsolidadoDiario?)null);
+
+        await _useCase.ProcessarCriadoAsync(new LancamentoCriadoEvent
+        {
+            Id = Guid.NewGuid(), Data = data,
+            Valor = 100m, Tipo = TipoLancamento.Debito, Descricao = "Teste"
+        });
+
+        // Cache DEVE ser invalidado após salvar — garante consistência
+        Received.InOrder(() =>
+        {
+            _repository.SalvarAsync(Arg.Any<ConsolidadoDiario>(), Arg.Any<CancellationToken>());
+            _cache.InvalidarAsync(data, Arg.Any<CancellationToken>());
+        });
+    }
+}

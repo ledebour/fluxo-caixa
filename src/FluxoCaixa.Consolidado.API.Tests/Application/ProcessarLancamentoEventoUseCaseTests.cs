@@ -2,10 +2,11 @@ using FluxoCaixa.Consolidado.API.Application.UseCases;
 using FluxoCaixa.Consolidado.API.Domain.Interfaces;
 using FluxoCaixa.Shared.Enums;
 using FluxoCaixa.Shared.Events;
-using NSubstitute;
-using FluxoCaixa.Consolidado.API.Domain.Entities;
-using Xunit;
 using Microsoft.Extensions.Logging;
+using NSubstitute;
+using Xunit;
+using FluxoCaixa.Consolidado.API.Domain.Entities;
+
 namespace FluxoCaixa.Consolidado.Tests.Application;
 
 /// <summary>
