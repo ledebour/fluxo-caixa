@@ -39,7 +39,7 @@ sleep 5
 log "RabbitMQ pronto"
 
 # 4. Serviço de Lançamentos
-info "Iniciando Lançamentos API (porta 5001)..."
+info "Iniciando Lançamentos API (porta 5101)..."
 cd src/FluxoCaixa.Lancamentos.API
 dotnet run --no-launch-profile \
   --urls "http://localhost:5001" \
@@ -50,7 +50,7 @@ cd ../..
 sleep 3
 
 # 5. Serviço de Consolidado
-info "Iniciando Consolidado API (porta 5002)..."
+info "Iniciando Consolidado API (porta 5102)..."
 cd src/FluxoCaixa.Consolidado.API
 dotnet run --no-launch-profile \
   --urls "http://localhost:5002" \
@@ -72,8 +72,10 @@ echo ""
 log "Todos os serviços iniciados!"
 echo ""
 echo "  🌐  Frontend:           http://localhost:4200"
-echo "  ⚙️   Lançamentos API:    http://localhost:5001  (Swagger: /)"
-echo "  📊  Consolidado API:    http://localhost:5002  (Swagger: /)"
+echo "  ⚙️   Lançamentos API:    http://localhost:5101
+echo "  ⚙️   Lançamentos API Swagger:    http://localhost:5001
+echo "  📊  Consolidado API:    http://localhost:5102
+echo "  📊  Consolidado API Swagger:    http://localhost:5002
 echo "  🐰  RabbitMQ Manager:   http://localhost:15672  (fluxo/fluxo123)"
 echo ""
 echo "  Pressione Ctrl+C para encerrar todos os serviços"

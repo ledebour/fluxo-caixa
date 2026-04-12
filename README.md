@@ -18,7 +18,7 @@ Sistema de controle de fluxo de caixa diário com lançamentos financeiros (déb
                  │ REST                 │ REST
     ┌────────────▼──────────┐  ┌────────▼──────────────┐
     │  Lançamentos API      │  │  Consolidado API       │
-    │  .NET 8 — porta 5001  │  │  .NET 8 — porta 5002  │
+    │  .NET 8 — porta 5101  │  │  .NET 8 — porta 5102  │
     │  Swagger em /         │  │  Swagger em /          │
     └────────────┬──────────┘  └────────┬──────────────┘
                  │ Publica              │ Consome
@@ -114,7 +114,7 @@ docker compose up -d
 ```bash
 cd src/FluxoCaixa.Lancamentos.API
 dotnet run
-# API: http://localhost:5001
+# API: http://localhost:5101
 # Swagger: http://localhost:5001
 ```
 
@@ -123,7 +123,7 @@ dotnet run
 ```bash
 cd src/FluxoCaixa.Consolidado.API
 dotnet run
-# API: http://localhost:5002
+# API: http://localhost:5102
 # Swagger: http://localhost:5002
 ```
 
@@ -151,8 +151,8 @@ docker compose --profile full up -d
 | Serviço | URL | Credenciais |
 |---------|-----|-------------|
 | Frontend | http://localhost:4200 | — |
-| Lançamentos API (Swagger) | http://localhost:5001 | — |
-| Consolidado API (Swagger) | http://localhost:5002 | — |
+| Lançamentos API (Swagger) | http://localhost:5101 | — |
+| Consolidado API (Swagger) | http://localhost:5102 | — |
 | RabbitMQ Management | http://localhost:15672 | fluxo / fluxo123 |
 | PostgreSQL | localhost:5432 | fluxo / fluxo123 |
 | Redis | localhost:6379 | — |
@@ -161,7 +161,7 @@ docker compose --profile full up -d
 
 ## 📡 Endpoints
 
-### Lançamentos API (`localhost:5001`)
+### Lançamentos API (`localhost:5101`)
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
@@ -183,7 +183,7 @@ POST /api/lancamentos
 }
 ```
 
-### Consolidado API (`localhost:5002`)
+### Consolidado API (`localhost:5102`)
 
 | Método | Rota | Descrição |
 |--------|------|-----------|

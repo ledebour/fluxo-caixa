@@ -23,8 +23,8 @@ ng serve          # http://localhost:4200
 ```
 
 O proxy redireciona automaticamente:
-- `/api/lancamentos` → `http://localhost:5001`
-- `/api/consolidado` → `http://localhost:5002`
+- `/api/lancamentos` → `http://localhost:5101`
+- `/api/consolidado` → `http://localhost:5102`
 
 ## Build de produção
 
