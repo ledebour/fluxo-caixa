@@ -1,4 +1,5 @@
 using FluxoCaixa.Consolidado.API.Domain.Entities;
+using Xunit;
 
 namespace FluxoCaixa.Consolidado.Tests.Domain;
 

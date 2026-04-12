@@ -5,6 +5,7 @@ using FluxoCaixa.Shared.Events;
 using NSubstitute;
 using FluxoCaixa.Consolidado.API.Domain.Entities;
 using Xunit;
+using Microsoft.Extensions.Logging;
 namespace FluxoCaixa.Consolidado.Tests.Application;
 
 /// <summary>
