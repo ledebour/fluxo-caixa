@@ -29,36 +29,36 @@
         }
       </div>
 
-      @if (carregandoHoje()) {
+      @if (carregandoHoje() ) {
         <div class="empty-state" style="padding: 2rem 0">
           <div class="spinner"></div>
         </div>
-      } @else if (consolidadoHoje(); as c) {
+      } @else if (consolidadoHoje()) {
         <div class="hoje-card__saldo" [ngClass]="saldoClass()">
-          {{ c.saldoFinal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+          {{ consolidadoHoje()?.saldoFinal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
         </div>
         <div class="hoje-card__grid">
           <div class="hoje-card__stat">
             <span class="hoje-card__stat-label">Créditos</span>
             <span class="hoje-card__stat-value valor-positivo">
-              {{ c.totalCreditos | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+              {{ consolidadoHoje()?.totalCreditos | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
             </span>
           </div>
           <div class="hoje-card__divider"></div>
           <div class="hoje-card__stat">
             <span class="hoje-card__stat-label">Débitos</span>
             <span class="hoje-card__stat-value valor-negativo">
-              {{ c.totalDebitos | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+              {{ consolidadoHoje()?.totalDebitos | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
             </span>
           </div>
           <div class="hoje-card__divider"></div>
           <div class="hoje-card__stat">
             <span class="hoje-card__stat-label">Lançamentos</span>
-            <span class="hoje-card__stat-value valor-neutro">{{ c.quantidadeLancamentos }}</span>
+            <span class="hoje-card__stat-value valor-neutro">{{ consolidadoHoje()?.quantidadeLancamentos }}</span>
           </div>
         </div>
         <div class="hoje-card__footer">
-          Atualizado em {{ c.atualizadoEm | date:'dd/MM/yy HH:mm' }}
+          Atualizado em {{ consolidadoHoje()?.atualizadoEm | date:'dd/MM/yy HH:mm' }}
         </div>
       } @else {
         <div class="hoje-card__empty">
