@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
-  lancamentosApiUrl: '/api/lancamentos',
-  consolidadoApiUrl: '/api/consolidado',
+  lancamentosApiUrl: 'http://localhost:5101/api/lancamentos',
+  consolidadoApiUrl: 'http://localhost:5102/api/consolidado',
 };

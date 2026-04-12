@@ -1,18 +1,18 @@
 {
   "/api/lancamentos": {
-    "target": "http://localhost:5001",
+    "target": "http://localhost:5101",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "info"
   },
   "/api/consolidado": {
-    "target": "http://localhost:5002",
+    "target": "http://localhost:5102",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "info"
   },
   "/api/health": {
-    "target": "http://localhost:5001",
+    "target": "http://localhost:5101",
     "secure": false,
     "changeOrigin": true
   }
