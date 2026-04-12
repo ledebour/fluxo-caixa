@@ -2,7 +2,6 @@ using FluxoCaixa.Lancamentos.API.Domain.Entities;
 using FluxoCaixa.Lancamentos.API.Domain.Exceptions;
 using FluxoCaixa.Shared.Enums;
 using Xunit;
-
 namespace FluxoCaixa.Lancamentos.Tests.Domain;
 
 public class LancamentoTests

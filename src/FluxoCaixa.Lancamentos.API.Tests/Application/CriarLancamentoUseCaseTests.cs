@@ -1,10 +1,10 @@
 using FluxoCaixa.Lancamentos.API.Application.DTOs;
 using FluxoCaixa.Lancamentos.API.Application.UseCases;
+using FluxoCaixa.Lancamentos.API.Domain.Entities;
 using FluxoCaixa.Lancamentos.API.Domain.Interfaces;
 using FluxoCaixa.Shared.Enums;
 using NSubstitute;
 using Xunit;
-
 namespace FluxoCaixa.Lancamentos.API.Tests.Application;
 
 public class CriarLancamentoUseCaseTests
@@ -49,7 +49,7 @@ public class CriarLancamentoUseCaseTests
 
         await _useCase.ExecutarAsync(request);
 
-        await _repository.Received(1).AdicionarAsync(Arg.Any<Domain.Entities.Lancamento>(), Arg.Any<CancellationToken>());
+        await _repository.Received(1).AdicionarAsync(Arg.Any<Lancamento>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
