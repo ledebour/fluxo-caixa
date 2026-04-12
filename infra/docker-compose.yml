@@ -63,8 +63,8 @@ services:
 
   lancamentos-api:
     build:
-      context: ../src/FluxoCaixa.Lancamentos.API
-      dockerfile: Dockerfile
+      context: ../src
+      dockerfile: FluxoCaixa.Lancamentos.API/Dockerfile
     container_name: fluxo-lancamentos-api
     ports:
       - "5001:8080"
@@ -90,8 +90,8 @@ services:
 
   consolidado-api:
     build:
-      context: ../src/FluxoCaixa.Consolidado.API
-      dockerfile: Dockerfile
+      context: ../src
+      dockerfile: FluxoCaixa.Consolidado.API/Dockerfile
     container_name: fluxo-consolidado-api
     ports:
       - "5002:8080"
