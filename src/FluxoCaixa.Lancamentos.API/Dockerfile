@@ -11,8 +11,7 @@ COPY FluxoCaixa.Lancamentos.API/ ./FluxoCaixa.Lancamentos.API/
 
 RUN dotnet publish ./FluxoCaixa.Lancamentos.API/FluxoCaixa.Lancamentos.API.csproj \
     -c Release \
-    -o /app/publish \
-    --no-restore
+    -o /app/publish
 
 # ── Stage 2: Runtime ──────────────────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runtime
