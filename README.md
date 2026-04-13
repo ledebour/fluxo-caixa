@@ -151,8 +151,10 @@ docker compose --profile full up -d
 | Serviço | URL | Credenciais |
 |---------|-----|-------------|
 | Frontend | http://localhost:4200 | — |
-| Lançamentos API (Swagger) | http://localhost:5101 | — |
-| Consolidado API (Swagger) | http://localhost:5102 | — |
+| Lançamentos API           | http://localhost:5101 | — |
+| Lançamentos API (Swagger) | http://localhost:5001 | — |
+| Consolidado API           | http://localhost:5102 | — |
+| Consolidado API (Swagger) | http://localhost:5002 | — |
 | RabbitMQ Management | http://localhost:15672 | fluxo / fluxo123 |
 | PostgreSQL | localhost:5432 | fluxo / fluxo123 |
 | Redis | localhost:6379 | — |
