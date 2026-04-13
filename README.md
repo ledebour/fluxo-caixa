@@ -209,10 +209,10 @@ dotnet test --collect:"XPlat Code Coverage"
 ```
 
 **Cobertura atual:**
-- Domínio de Lançamentos: 13 testes unitários
-- Use Cases de Lançamentos: 3 testes com mocks (NSubstitute)
-- Domínio de Consolidado: 8 testes unitários
-- Use Cases de Consolidado: 3 testes de integração (fluxo RabbitMQ → consolidado)
+- Domínio de Lançamentos: 30 testes unitários
+- Use Cases de Lançamentos: 22 testes com mocks (NSubstitute)
+- Domínio de Consolidado: 22 testes unitários
+- Use Cases de Consolidado: 18 testes de integração (fluxo RabbitMQ → consolidado)
 
 ---
 
