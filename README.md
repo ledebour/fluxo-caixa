@@ -39,32 +39,74 @@ O consolidado diário é consultado com alta frequência no dashboard. O Redis s
 
 ### Registro de lançamento
 
-```
-1. Frontend         → POST /api/lancamentos
-2. Lançamentos API  → Valida domínio → persiste no PostgreSQL
-3. Lançamentos API  → Publica evento "lancamento.criado" no RabbitMQ
-4. Consolidado API  → Consome evento (ACK manual, prefetch=1)
-5. Consolidado API  → Cria ou atualiza ConsolidadoDiario no PostgreSQL
-6. Consolidado API  → Invalida cache Redis da data afetada
+```mermaid
+sequenceDiagram
+    participant F as Frontend
+    participant L as Lançamentos API
+    participant R as RabbitMQ
+    participant C as Consolidado API
+    participant P as PostgreSQL
+
+    F->>L: POST /api/lancamentos
+    L->>P: INSERT lancamento
+    P-->>L: OK
+    L->>R: publish lancamento.criado
+    L-->>F: 201 Created
+
+    Note over R,C: assíncrono — sem bloqueio do cliente
+
+    R->>C: consume (ACK manual, prefetch=1)
+    C->>P: UPSERT consolidado_diario
+    P-->>C: OK
+    C-->>R: ACK + invalida Redis
 ```
 
 ### Consulta de consolidado diário
 
-```
-1. Frontend         → GET /api/consolidado?data=2025-01-15
-2. Consolidado API  → Verifica Redis
-   ├─ Cache HIT     → Retorna direto do Redis (< 1ms), campo VeioDoCache=true
-   └─ Cache MISS    → Consulta PostgreSQL → armazena no Redis → retorna
+```mermaid
+sequenceDiagram
+    participant F as Frontend
+    participant C as Consolidado API
+    participant Re as Redis
+    participant P as PostgreSQL
+
+    F->>C: GET /api/consolidado?data=YYYY-MM-DD
+    C->>Re: GET consolidado:{data}
+
+    alt Cache HIT
+        Re-->>C: dados (VeioDoCache=true)
+        C-->>F: 200 < 1ms
+    else Cache MISS
+        Re-->>C: null
+        C->>P: SELECT consolidado_diario
+        P-->>C: dados
+        C->>Re: SET consolidado:{data} TTL
+        C-->>F: 200 (VeioDoCache=false)
+    end
 ```
 
 ### Remoção de lançamento
 
-```
-1. Frontend         → DELETE /api/lancamentos/{id}
-2. Lançamentos API  → Remove do PostgreSQL
-3. Lançamentos API  → Publica evento "lancamento.removido" no RabbitMQ
-4. Consolidado API  → Consome evento → estorna crédito ou débito do dia
-5. Consolidado API  → Invalida cache Redis da data afetada
+```mermaid
+sequenceDiagram
+    participant F as Frontend
+    participant L as Lançamentos API
+    participant R as RabbitMQ
+    participant C as Consolidado API
+    participant P as PostgreSQL
+
+    F->>L: DELETE /api/lancamentos/{id}
+    L->>P: DELETE lancamento
+    P-->>L: OK
+    L->>R: publish lancamento.removido
+    L-->>F: 204 No Content
+
+    Note over R,C: assíncrono — sem bloqueio do cliente
+
+    R->>C: consume (ACK manual)
+    C->>P: UPDATE estorno crédito/débito
+    P-->>C: OK
+    C-->>R: ACK + invalida Redis
 ```
 
 ---
