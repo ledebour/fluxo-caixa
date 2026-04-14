@@ -6,7 +6,7 @@ Sistema distribuído para controle de lançamentos financeiros e consolidação 
 
 ## 🏗️ Arquitetura
 
-![image](https://github.com/ledebour/fluxo-caixa/assets/arquitetura.png)
+![image](https://github.com/ledebour/fluxo-caixa/blob/main/assets/arquitetura.png)
 
 ---
 
