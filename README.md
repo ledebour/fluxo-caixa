@@ -202,28 +202,25 @@ fluxo-caixa/
 
 **Cobertura atual:**
 
-- Domínio de Lançamentos: 30 testes unitários
-- Use Cases de Lançamentos: 22 testes com mocks (NSubstitute)
-- Domínio de Consolidado: 22 testes unitários
-- Use Cases de Consolidado: 18 testes de integração (fluxo RabbitMQ → consolidado)
+- Domínio de Lançamentos: 30 testes unitários (~85%)
+- Use Cases de Lançamentos: 22 testes com mocks (NSubstitute) (~70%)
+- Domínio de Consolidado: 22 testes unitários (~90%)
+- Use Cases de Consolidado: 18 testes de integração (fluxo RabbitMQ → consolidado) (~65%)
+- Serviços auxiliares: 8 testes (RabbitMQ Publisher, CacheService, validações extras)
 
 ### Estratégia
 
-Testes organizados em duas camadas por serviço: **domínio** (regras de negócio isoladas) e **aplicação** (casos de uso com mocks via NSubstitute).
+Os testes estão organizados em duas camadas por serviço:
 
-| Projeto     | Camada    | Arquivo                                       | O que cobre                                                          |
-| ----------- | --------- | --------------------------------------------- | -------------------------------------------------------------------- |
-| Lancamentos | Domínio   | `LancamentoTests.cs`                          | Criação válida, normalização de data, tipos, exceções                |
-| Lancamentos | Domínio   | `LancamentoBoundaryTests.cs`                  | Valor 0.01/9.999.999,99, descrição 1/200/201 chars, IDs únicos       |
-| Lancamentos | Domínio   | `ExcecoesDominioTests.cs`                     | DomainException, NotFoundException                                   |
-| Lancamentos | Aplicação | `CriarLancamentoUseCaseTests.cs`              | Persistência no repo, publicação de evento no RabbitMQ               |
-| Lancamentos | Aplicação | `ConsultarLancamentosUseCaseTests.cs`         | Consulta e mapeamento para DTO                                       |
-| Lancamentos | Aplicação | `RemoverLancamentoUseCaseTests.cs`            | Remoção, evento removido publicado, not found                        |
-| Consolidado | Domínio   | `ConsolidadoDiarioTests.cs`                   | Saldo zerado, crédito, débito, estorno, rehidratar                   |
-| Consolidado | Domínio   | `ConsolidadoDiarioBoundaryTests.cs`           | Estorno além do total (floor zero), `AtualizadoEm`, saldo negativo   |
-| Consolidado | Aplicação | `ConsultarConsolidadoUseCaseTests.cs`         | Cache HIT/MISS, agregação de período, datas inválidas                |
-| Consolidado | Aplicação | `ProcessarLancamentoEventoUseCaseTests.cs`    | Evento criado/removido, criação de consolidado, invalidação de cache |
-| Consolidado | Aplicação | `ProcessarLancamentoEventoAdicionaisTests.cs` | Acúmulo em dia existente, múltiplos eventos, ordem save→invalidar    |
+- **Domínio** → regras de negócio isoladas
+- **Aplicação** → casos de uso com mocks (NSubstitute) e integração (RabbitMQ → Consolidado)
+- **Serviços auxiliares** → testes de infraestrutura (RabbitMQ, cache, validações)
+
+### Tipos de testes
+
+- **Unitários**: validação de regras de negócio
+- **Com mocks**: simulação de dependências externas
+- **Integração**: fluxo completo entre serviços e mensageria
 
 ### Executar
 
