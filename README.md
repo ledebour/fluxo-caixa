@@ -180,6 +180,10 @@ fluxo-caixa/
     │   ├── Domain/LancamentoBoundaryTests.cs
     │   ├── Domain/ExcecoesDominioTests.cs
     │   └── Application/                        # CriarLancamento, ConsultarLancamentos, RemoverLancamento
+    ├── FluxoCaixa.Lancamentos.API.IntegrationTests/
+    │   ├── Controllers/LancamentosControllerTests.cs
+    │   ├── Middleware/ExceptionHandlingMiddlewareTests.cs
+    │   └── LancamentosApiFactory  .cs
     ├── FluxoCaixa.Consolidado.API/
     │   ├── API/Controllers/ConsolidadoController.cs
     │   ├── Application/UseCases/               # ConsultarConsolidado, ProcessarLancamentoEvento
@@ -190,10 +194,14 @@ fluxo-caixa/
     │       ├── Data/                           # EF Core, Migrations
     │       ├── Messaging/RabbitMqConsumerService.cs
     │       └── Repositories/ConsolidadoRepository.cs
-    └── FluxoCaixa.Consolidado.API.Tests/
-        ├── Domain/ConsolidadoDiarioTests.cs
-        ├── Domain/ConsolidadoDiarioBoundaryTests.cs
-        └── Application/                        # ConsultarConsolidado, ProcessarLancamentoEvento
+    ├── FluxoCaixa.Consolidado.API.Tests/
+    │   ├── Domain/ConsolidadoDiarioTests.cs
+    │   ├── Domain/ConsolidadoDiarioBoundaryTests.cs
+    │   └── Application/                        # ConsultarConsolidado, ProcessarLancamentoEvento
+    └── FluxoCaixa.Consolidado.API.IntegrationTests/
+        ├── Cache/RedisConsolidadoCacheTests.cs
+        ├── Controllers/ConsolidadoControllerTests.cs
+        └── Repositories/RepositoryTests.cs
 ```
 
 ---
@@ -230,8 +238,9 @@ dotnet test
 
 # Por projeto
 dotnet test src/FluxoCaixa.Lancamentos.API.Tests/
+dotnet test src/FluxoCaixa.Lancamentos.API.IntegrationTests/
 dotnet test src/FluxoCaixa.Consolidado.API.Tests/
-
+dotnet test src/FluxoCaixa.Consolidado.API.IntegrationTests/
 # Com cobertura
 dotnet test --collect:"XPlat Code Coverage"
 ```
