@@ -101,3 +101,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.Run();
+
+namespace FluxoCaixa.Lancamentos.API
+{
+    public partial class Program { }
+}
+

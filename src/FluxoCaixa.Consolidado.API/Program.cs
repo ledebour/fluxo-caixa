@@ -92,4 +92,8 @@ if (app.Environment.IsDevelopment())
 
 app.Run();
 
-public partial class Program { }
+namespace FluxoCaixa.Consolidado.API
+{
+    public partial class Program { }
+}
+

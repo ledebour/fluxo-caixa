@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluxoCaixa.Consolidado.API.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluxoCaixa.Consolidado.API.IntegrationTests", "src\FluxoCaixa.Consolidado.API.IntegrationTests\FluxoCaixa.Consolidado.API.IntegrationTests.csproj", "{6AF34F54-E3B6-4275-839A-7F16A23CBECE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluxoCaixa.Lancamentos.API.IntegrationTests", "src\FluxoCaixa.Lancamentos.API.IntegrationTests\FluxoCaixa.Lancamentos.API.IntegrationTests.csproj", "{930A5EB1-1CD5-41CC-A8CC-CEC574A1135C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{6AF34F54-E3B6-4275-839A-7F16A23CBECE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6AF34F54-E3B6-4275-839A-7F16A23CBECE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6AF34F54-E3B6-4275-839A-7F16A23CBECE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{930A5EB1-1CD5-41CC-A8CC-CEC574A1135C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{930A5EB1-1CD5-41CC-A8CC-CEC574A1135C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{930A5EB1-1CD5-41CC-A8CC-CEC574A1135C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{930A5EB1-1CD5-41CC-A8CC-CEC574A1135C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 
 EndGlobal
