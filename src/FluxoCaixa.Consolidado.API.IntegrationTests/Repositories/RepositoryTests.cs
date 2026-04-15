@@ -32,6 +32,79 @@ public class LancamentoRepositoryTests : IDisposable
         _repository = new LancamentoRepository(_context, Substitute.For<ILogger<LancamentoRepository>>());
     }
 
+    // ─── ObterPorPeriodoAsync ─────────────────────────────────────────────────
+
+    [Fact]
+    public async Task ObterPorPeriodoAsync_DeveFiltrarLancamentosNoIntervalo()
+    {
+        var d1 = new DateTime(2025, 1, 10);
+        var d2 = new DateTime(2025, 1, 15);
+        var d3 = new DateTime(2025, 1, 20);
+
+        await _repository.AdicionarAsync(Lancamento.Criar(d1, 100m, TipoLancamento.Credito, "Dia 10"));
+        await _repository.AdicionarAsync(Lancamento.Criar(d2, 200m, TipoLancamento.Debito, "Dia 15"));
+        await _repository.AdicionarAsync(Lancamento.Criar(d3, 300m, TipoLancamento.Credito, "Dia 20"));
+
+        var resultado = (await _repository.ObterPorPeriodoAsync(d1, d2)).ToList();
+
+        Assert.Equal(2, resultado.Count);
+        Assert.DoesNotContain(resultado, l => l.Descricao == "Dia 20");
+    }
+
+    [Fact]
+    public async Task ObterPorPeriodoAsync_SemLancamentosNoIntervalo_DeveRetornarVazio()
+    {
+        var resultado = await _repository.ObterPorPeriodoAsync(
+            new DateTime(2000, 1, 1), new DateTime(2000, 1, 31));
+        Assert.Empty(resultado);
+    }
+
+    [Fact]
+    public async Task ObterPorPeriodoAsync_DeveRetornarOrdenadoPorDataECriadoEm()
+    {
+        var data = new DateTime(2025, 3, 5);
+        await _repository.AdicionarAsync(Lancamento.Criar(data, 300m, TipoLancamento.Credito, "Terceiro"));
+        await Task.Delay(5); // garante CriadoEm distinto
+        await _repository.AdicionarAsync(Lancamento.Criar(data, 100m, TipoLancamento.Credito, "Primeiro"));
+        await Task.Delay(5);
+        await _repository.AdicionarAsync(Lancamento.Criar(data, 200m, TipoLancamento.Debito, "Segundo"));
+
+        var resultado = (await _repository.ObterPorPeriodoAsync(data, data)).ToList();
+
+        Assert.Equal(3, resultado.Count);
+        // OrderBy Data, ThenBy CriadoEm — primeiro inserido deve vir antes
+        Assert.Equal("Terceiro", resultado[0].Descricao);
+    }
+
+    [Fact]
+    public async Task ObterPorPeriodoAsync_MesmoDia_DeveRetornarLancamentosDodia()
+    {
+        var data = new DateTime(2025, 6, 15);
+        await _repository.AdicionarAsync(Lancamento.Criar(data, 50m, TipoLancamento.Credito, "A"));
+        await _repository.AdicionarAsync(Lancamento.Criar(data, 75m, TipoLancamento.Debito, "B"));
+
+        var resultado = (await _repository.ObterPorPeriodoAsync(data, data)).ToList();
+
+        Assert.Equal(2, resultado.Count);
+    }
+
+    // ─── ObterTodosAsync — ordenação DESC ─────────────────────────────────────
+
+    [Fact]
+    public async Task ObterTodosAsync_DeveOrdenarPorDataDescendente()
+    {
+        var antiga = new DateTime(2025, 1, 1);
+        var recente = new DateTime(2025, 12, 31);
+
+        await _repository.AdicionarAsync(Lancamento.Criar(antiga, 100m, TipoLancamento.Credito, "Antiga"));
+        await _repository.AdicionarAsync(Lancamento.Criar(recente, 200m, TipoLancamento.Debito, "Recente"));
+
+        var resultado = (await _repository.ObterTodosAsync()).ToList();
+
+        Assert.Equal("Recente", resultado[0].Descricao);
+        Assert.Equal("Antiga", resultado[1].Descricao);
+    }
+
     [Fact]
     public async Task AdicionarAsync_DevePersisteERecuperarLancamento()
     {
