@@ -49,7 +49,7 @@ public class Lancamento
         if (data == default)
             throw new DomainException("A data do lançamento é obrigatória.");
 
-        if (data.Date > DateTime.UtcNow.Date)
+        if (data.Date > DateTime.Now.Date)
             throw new DomainException("Não é permitido criar lançamentos com data futura.");
     }
 
