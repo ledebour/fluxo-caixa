@@ -57,9 +57,9 @@ builder.Services.AddDbContext<LancamentosDbContext>(opts =>
 builder.Services.AddScoped<ILancamentoRepository, LancamentoRepository>();
 
 // ─── Mensageria (RabbitMQ) ───────────────────────────────────────────────────
-// ─── RabbitMQ Settings 
- builder.Services.Configure<RabbitMqSettings>(
-     builder.Configuration.GetSection("RabbitMQ"));
+// ─── RabbitMQ Settings
+builder.Services.Configure<RabbitMqSettings>(
+    builder.Configuration.GetSection("RabbitMQ"));
 
 builder.Services.AddSingleton<IEventPublisher, RabbitMqEventPublisher>();
 
@@ -94,7 +94,10 @@ if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<LancamentosDbContext>();
-    db.Database.Migrate();
+    if (db.Database.IsRelational())
+    {
+        db.Database.Migrate();
+    }
 }
 
 app.Run();
