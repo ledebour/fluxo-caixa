@@ -219,7 +219,8 @@ fluxo-caixa/
 - FluxoCaixa.Consolidado.Application: ~97.8%
 - FluxoCaixa.Lancamentos.Infrastructure: ~97.4%
 - FluxoCaixa.Consolidado.Infrastructure: ~96.4%
-  ⚠️ Classes de Migrations, ModelSnapshot e RabbitMqSettings foram desconsideradas da análise por serem código gerado automaticamente pelo Entity Framework Core, não representando regras de negócio.
+
+Observações: Classes de Migrations, ModelSnapshot e RabbitMqSettings foram desconsideradas da análise por serem código gerado automaticamente pelo Entity Framework Core, não representando regras de negócio.
 
 ### Estratégia
 
