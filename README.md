@@ -179,6 +179,7 @@ fluxo-caixa/
     │   ├── Domain/LancamentoTests.cs
     │   ├── Domain/LancamentoBoundaryTests.cs
     │   ├── Domain/ExcecoesDominioTests.cs
+    │   ├── Infrastructure/Messaging/RabbitMqEventPublisherTests.cs
     │   └── Application/                        # CriarLancamento, ConsultarLancamentos, RemoverLancamento
     ├── FluxoCaixa.Lancamentos.API.IntegrationTests/
     │   ├── Controllers/LancamentosControllerTests.cs
@@ -197,6 +198,7 @@ fluxo-caixa/
     ├── FluxoCaixa.Consolidado.API.Tests/
     │   ├── Domain/ConsolidadoDiarioTests.cs
     │   ├── Domain/ConsolidadoDiarioBoundaryTests.cs
+    │   ├── Infrastructure/Messaging/RabbitMqConsumerServiceTests.cs
     │   └── Application/                        # ConsultarConsolidado, ProcessarLancamentoEvento
     └── FluxoCaixa.Consolidado.API.IntegrationTests/
         ├── Cache/RedisConsolidadoCacheTests.cs
@@ -210,25 +212,28 @@ fluxo-caixa/
 
 **Cobertura atual:**
 
-- Domínio de Lançamentos: 30 testes unitários (~85%)
-- Use Cases de Lançamentos: 22 testes com mocks (NSubstitute) (~70%)
-- Domínio de Consolidado: 22 testes unitários (~90%)
-- Use Cases de Consolidado: 18 testes de integração (fluxo RabbitMQ → consolidado) (~65%)
-- Serviços auxiliares: 8 testes (RabbitMQ Publisher, CacheService, validações extras)
+- Cobertura geral: ~89.8% (Line coverage)
+- FluxoCaixa.Lancamentos.Domain: 100%
+- FluxoCaixa.Consolidado.Domain: 100%
+- FluxoCaixa.Lancamentos.Application: ~100%
+- FluxoCaixa.Consolidado.Application: ~97.8%
+- FluxoCaixa.Lancamentos.Infrastructure: ~97.4%
+- FluxoCaixa.Consolidado.Infrastructure: ~96.4%
+  ⚠️ Classes de Migrations, ModelSnapshot e RabbitMqSettings foram desconsideradas da análise por serem código gerado automaticamente pelo Entity Framework Core, não representando regras de negócio.
 
 ### Estratégia
 
-Os testes estão organizados em duas camadas por serviço:
+Os testes foram organizados respeitando a separação por camadas da arquitetura:
 
-- **Domínio** → regras de negócio isoladas
-- **Aplicação** → casos de uso com mocks (NSubstitute) e integração (RabbitMQ → Consolidado)
-- **Serviços auxiliares** → testes de infraestrutura (RabbitMQ, cache, validações)
+- **Domínio** → Testes unitários focados exclusivamente em regras de negócio, garantindo consistência e validações críticas.
+- **Aplicação** → Testes utilizando mocks com NSubstitute para simular dependências externas e validar orquestração dos casos de uso.
+- **Serviços auxiliares** → Testes cobrindo integrações essenciais como mensageria e persistência, garantindo comportamento esperado sem acoplamento ao ambiente externo. (RabbitMQ, cache, validações)
 
 ### Tipos de testes
 
-- **Unitários**: validação de regras de negócio
-- **Com mocks**: simulação de dependências externas
-- **Integração**: fluxo completo entre serviços e mensageria
+- **Unitários**: Validação isolada das regras de negócio no domínio.
+- **Com mocks**: Simulação de dependências externas (repositórios, mensageria, cache), garantindo testes rápidos e determinísticos.
+- **Integração**: Validação de fluxos completos, incluindo comunicação assíncrona via mensageria (ex: publicação e consumo de eventos).
 
 ### Executar
 
